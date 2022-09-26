@@ -22,6 +22,7 @@
     Collect: query
   }
 
+  let errmsg = null;
   export let opid;
 
   let info = {},
@@ -42,7 +43,7 @@
         rhs: null,
       }
     }
-   setupFunction = functions[info.name] ?? (() => "na")
+   setupFunction = functions[info.name] 
   }
 
   let wstVis = null;
@@ -50,14 +51,16 @@
 
   function render() {
     if (opid == null) return
-    let wstStep = setupFunction(opid, $lineageData, addOns)
-    let spec = {
-      type: "sql",
-      trace: [wstStep]
+    if (wstVis) wstVis.destroy()
+
+    if (!setupFunction) {
+      errmsg = "Don't know how to render this yet :("
+      return;
     }
+    let wstStep = setupFunction(opid, $lineageData, addOns)
+    let spec = { type: "sql", trace: [wstStep] }
     console.log(spec)
     try {
-      if (wstVis) wstVis.destroy()
       wstVis = createVisualizer(`#vis-${opid}`, spec)
     } catch (e) { 
       console.error(e)
@@ -109,4 +112,9 @@
   <h3 class="stepHeader">{opid} {info.name}</h3>
   <p class="stepDesc">{info.str}</p>
   <div id={`vis-${opid}`} bind:this={visEl}/>
+  {#if errmsg}
+  <div class="alert alert-warn">
+    {errmsg}
+  </div>
+  {/if}
 </div>

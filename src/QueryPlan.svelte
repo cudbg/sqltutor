@@ -41,12 +41,16 @@
   }
   $: {
     if (opid2circles) {
-      circles.attr("fill", "black")
+      circles
+        .attr("fill", "black")
+        .attr("font-size", "medium")
       let opids = $selectedOpids ?? []
 
       opids.forEach((opid) => {
         if (!opid2circles[opid]) return;
-        select(opid2circles[opid]).attr("fill", "red")
+        select(opid2circles[opid])
+          .attr("fill", "red")
+          .attr("font-size", "x-large")
       })
     }
   }
@@ -123,8 +127,11 @@
         .style("text-anchor", "middle")
         .attr("role", "button")
         .on("click", async function() {
-          let opid = this.__data__.data.id
-          $selectedOpids = [opid];
+          let opid = [this.__data__.data.id].flat()[0]
+          $selectedOpids = [opid]
+          let idx = R.indexOf(opid, opidOrder)
+          stepIdx = idx
+          console.log("index", idx, opid, opidOrder)
         })
 
     opid2circles = {}
@@ -132,15 +139,6 @@
       opid2circles[this.__data__.data.id] = this; 
     })
 
-    // adds the text to the node
-    if (0) {
-      node.append("text")
-        .attr("dy", "0.5em")
-        .attr("font-size", "0.8em")
-        .attr("x", "-2em")
-        .style("text-anchor", "end")
-        .text((d) =>  info[d.data.id].name );
-    }
   }
 
   async function onCircleClick() {
@@ -165,9 +163,9 @@
 <h2>Query Plan</h2>
 <pre><code class="queryText">{$lineageData.qstr}</code></pre>
 <!--<button id="visualizeButton" type="button" on:click={onClick}>Visualize Entire Query Plan</button>-->
-<div>
-  <button on:click={() => step(-1)}>prev op</button>
-  <button on:click={() => step(1)}>next op</button>
+<div> 
+  <button on:click={() => step(-1)}>prev (or &leftarrow;)</button>
+  <button on:click={() => step(1)}>next (or &rightarrow;)</button>
 </div>
 <svg id="qPlanTreeSVG"  bind:this={svgEl}>
   <g 

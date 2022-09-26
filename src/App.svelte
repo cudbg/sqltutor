@@ -1,72 +1,26 @@
-<script context="module" lang="ts">
-  import { tick, onMount } from "svelte"
-
-  let pyodide = null;
-  let pyodideLoaded = false;
-  let msgEl = document.getElementById("msg");
-
-  async function initPyodide() {
-    //pyodideLoaded = true;
-    //return;
-    if (pyodide && pyodideLoaded) return;
-    msgEl.innerHTML = "(  0%) Loading Pyodide..";
-    window.pyodide = pyodide = await loadPyodide();
-    await tick()
-
-    msgEl.innerHTML = "( 10%) Loading micropip..";
-    await pyodide.loadPackage(["micropip"])
-    await tick()
-
-    msgEl.innerHTML = "( 20%) Loading pandas.."
-    await pyodide.loadPackage(["pandas", "python-dateutil"])
-    await tick()
-
-    msgEl.innerHTML = "( 60%) Loading parsimonious wheel.."
-    await pyodide.runPythonAsync(`
-import pandas as pd
-import io
-import json
-import micropip
-await micropip.install("/parsimonious-0.9.0-py3-none-any.whl")
-   `)
-    await tick()
-
-    msgEl.innerHTML = "( 80%) Loading sql2pandas wheel.."
-   await pyodide.runPythonAsync(`
-await micropip.install('/databass-0.0.1-py3-none-any.whl')
-import databass 
-from databass import *
-db = Database.db()
-    `)
-    msgEl.innerHTML = "(100%) Ready!"
-    $: pyodideLoaded = true;
-  }
-
-
-  function getQueryLineage(q) {
-    let code = `json_str_for_vis("""${q}""")`
-    console.log(code)
-    let lineageJson = pyodide.runPython(code)
-    return JSON.parse(lineageJson)
-  }
-</script>
 <script lang="ts">
 
+  import { tick, onMount } from "svelte"
   import QueryPlan from "./QueryPlan.svelte"
   import LineageDiagram from "./LineageDiagram.svelte"
   import * as foo from "./assets/lineage.json"
   import { lineageData, selectedOpids } from "./stores.ts"
+  import { pyodide } from "./pyodide"
 
+  let msgEl = document.getElementById("msg");
+  let queryParams = new URLSearchParams(window.location.search)
   $lineageData = foo;
 
+  let errmsg = null;
   let qplanEl;
   let editorEl;
   let csvEl;
-  let q = `SELECT a, sum(b+2) * 2 as c 
+  let permalink = "";
+  let q = queryParams.get("q") ?? `SELECT a, sum(b+2) * 2 as c 
   FROM data, (SELECT 1 as x FROM data) AS d2 
   WHERE data.a = d2.x
   GROUP BY a`;
-  let csv = `a,b,c,d,e,f,g
+  let csv = queryParams.get("csv") ?? `a,b,c,d,e,f,g
 0,0,0,0,a,2,c
 1,1,1,0,b,4,d
 2,2,0,0,c,6,e
@@ -88,8 +42,26 @@ db = Database.db()
 18,3,0,0,a,38,e
 19,4,1,0,b,40,cde`;
 
+  $: {
+    permalink = `https://cudbg.github.io/sqltutor/?q=${encodeURI(q)}&csv=${encodeURI(csv)}`;
+  }
+
+  function getQueryLineage(q) {
+    let code = `json_str_for_vis("""${q}""")`
+    console.log(code)
+    try {
+      let lineageJson = pyodide.pyodide.runPython(code)
+      let ret = JSON.parse(lineageJson)
+      $: errmsg = null;
+      return ret;
+    } catch(e) {
+      $: errmsg = e;
+    }
+  }
+
+
   function onSQLSubmit(){
-    pyodide.runPython(`
+    pyodide.pyodide.runPython(`
 csv = """${csv}"""
 data = pd.read_csv(io.StringIO(csv))
 db.register_dataframe("data", data)
@@ -114,6 +86,10 @@ db.register_dataframe("data", data)
 //    csvEditor.resize()
   })
 
+  function reportBug() {
+    
+  }
+
 
 </script>
 
@@ -128,43 +104,78 @@ db.register_dataframe("data", data)
     padding: 10em;
     display: none;
   }
-  .viscontainer {
+  .viscontainer,.errcontainer {
     margin-top: 3em;
   }
+  small {
+    font-size: 0.5em;
+  }
+  small input {
+    font-size: 0.9em;
+    margin-left: .5em;
+    color: grey;
+  }
+  .alert {
+    white-space: pre;
+  }
 </style>
-
-<svelte:head>
-  <link rel="stylesheet" href="/src/assets/css/bootstrap.min.css"/>
-  <script src="/src/assets/js/bootstrap.bundle.min.js" />
-</svelte:head>
 
 
 
 
 <main class="container">
-  <h1>SQL Execution Visualizer</h1>
-
+  <h1>
+    SQL Execution Visualizer 
+    <small class="text-muted">
+      permalink
+      <input type="text" bind:value={permalink} style="width:20em;"/>
+    </small>
+  </h1>
   <div class="row">
     <div class="col-md-4">
       <h3>About</h3>
-      <p> An SQL query is turned into a Query Plan, a set of operations that transform the input data and together provide the final output. We illustrate how each operator in the query plan transforms the input data, so you can see step-by-step how the result gets constructed.  </p>
-      <p>To start, put the input data and the SQL query you want to act on it, in the input section.  Then you can see what the final result is.  Below, you can see the query plan your query was turned into. Click on the operator nodes to see that operator's contribution, or click the button below it to see the entire query plan in action!  </p>
+      <p>
+      Visualizes each operator in the SQL query plan.  
+      Click on an operator to visualize its input and output tables, along with their row/column dependencies (called <a href="https://arxiv.org/abs/1801.07237">data provenance</a>) .  
+      </p>
+
+      <p>
+      Queries should be over the <mark>data</mark> table.  Its contents are loaded from the <mark>CSV</mark> textarea.  The CSV should include a header row.
+      </p>
+
+      <p> Use <mark>&leftarrow;</mark> and <mark>&rightarrow;</mark> to visualize the prev/next operator.  </p>
+
+      <p style="font-size:smaller;">
+        Implemented using the instructional 
+        <a href="https://github.com/w6113/databass-public">Databass query compilation engine</a>
+        developed for <a href="https://w6113.github.io">Columbia's COMS6113 Topics in Database Research</a>.  Table visualizer borrowed from <a href="https://pandastutor.com/">pandastutor</a>
+      </p>
+      <a href="#" class="link" on:click={reportBug}>report bug</a>
     </div>
+
+    {#await pyodide.init(msgEl)}
     <div class="col-md-4">
       <h3>SQL</h3>
-      <textarea class="editor" disabled={!pyodideLoaded} id="q" bind:this={editorEl} bind:value={q} />
-      {#await initPyodide()}
-        <!--<div class="loading"> Loading Databass DBMS </div>-->
-        <button class="btn btn-secondary" disabled>Visualize Query</button>
-      {:then}
-        <button class="btn btn-primary" on:click={onSQLSubmit}>Visualize Query</button>
-      {/await}
-      {#if pyodideLoaded} {/if}
+      <textarea class="editor" disabled bind:value={q} />
+      <button class="btn btn-secondary" disabled style="width:100%;">Visualize Query</button>
     </div>
     <div class="col-md-4">
-      <h3>CSV data <small class="text-muted">header in first row</small> </h3>
-      <textarea class="editor" disabled={!pyodideLoaded} id="csv" bind:this={csvEl} bind:value={csv} />
+      <h3>CSV<small class="text-muted">stored in <mark>data</mark> table.</small> </h3>
+      <textarea class="editor" disabled bind:value={csv} />
     </div>
+    {:then}
+    <div class="col-md-4">
+      <h3>SQL</h3>
+      <textarea class="editor" id="q" bind:this={editorEl} bind:value={q} />
+      <button class="btn btn-primary" on:click={onSQLSubmit} style="width:100%;">Visualize Query</button>
+    </div>
+    <div class="col-md-4">
+      <h3>CSV<small class="text-muted">stored in <b>data</b> table.  header in first row</small> </h3>
+      <textarea class="editor" id="csv" bind:this={csvEl} bind:value={csv} />
+    </div>
+    {/await}
+
+
   </div>
 
 
@@ -178,6 +189,17 @@ db.register_dataframe("data", data)
       </div>
     </div>
     {/if}
+    {#if errmsg}
+    <div class="row errcontainer">
+      <div class="col-md-12">
+        <div class="alert alert-danger" role="alert">
+          <h3>Could Not Parse Query</h3>
+          {errmsg}
+        </div>
+      </div>
+    </div>
+    {/if}
+
 
 </main>
 
