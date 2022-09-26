@@ -154,7 +154,7 @@ db.register_dataframe("data", data)
       <p> Use <mark>&leftarrow;</mark> and <mark>&rightarrow;</mark> to visualize the prev/next operator.  </p>
 
       <p style="font-size:smaller;">
-        Implemented using the instructional 
+      See <a href="https://github.com/cudbg/sqltutor">github repo</a> for code.   Implemented using the instructional 
         <a href="https://github.com/w6113/databass-public">Databass query compilation engine</a>
         developed for <a href="https://w6113.github.io">Columbia's COMS6113 Topics in Database Research</a>.  Table visualizer borrowed from <a href="https://pandastutor.com/">pandastutor</a>
       </p>
