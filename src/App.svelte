@@ -168,7 +168,7 @@ db.register_dataframe("data", data)
     <div class="col-md-4">
       <h3>SQL</h3>
       <textarea class="editor" disabled bind:value={q} />
-      <button class="btn btn-secondary" disabled style="width:100%;">Visualize Query</button>
+      <button class="btn btn-secondary" disabled style="width:100%;">Loading libraries...</button>
     </div>
     <div class="col-md-4">
       <h3>CSV<small class="text-muted">stored in <mark>data</mark> table.</small> </h3>
