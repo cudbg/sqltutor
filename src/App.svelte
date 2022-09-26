@@ -17,7 +17,7 @@
   let csvEl;
   let permalink = "";
   let q = queryParams.get("q") ?? `SELECT a, sum(b+2) * 2 as c 
-FROM data, (SELECT 1 as x FROM data) AS d2 
+FROM data, (SELECT a*b as x FROM data) AS d2 
 WHERE data.a = d2.x
 GROUP BY a`;
   let csv = queryParams.get("csv") ?? `a,b,c,d,e,f,g

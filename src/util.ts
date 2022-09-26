@@ -100,17 +100,19 @@ export function hashjoin(opid, lineageData, addOns) {
   let annotations = []
 
   // need to know attributes in join condition
-  if (false) {
-    let colsToHighlight = [
-      ["lhs", colid]
-      ["lhs2", colid]
-      ["rhs", colid]
-      ["rhs", colid]
-    ]
-    colsToHighlight.map(([table, col]) => { 
-      return { type: "box", target: { table, col, row: "all" } }
-    })
-  }
+
+  // the columns to outline
+  // indexes of attributes in predicate
+  lineageData.exprs[opid]?.forEach(([srcIdx, colIdxs]) => {
+    let table = (srcIdx == 0)? "lhs" : "lhs2";
+    colIdxs.forEach((col) => 
+      annotations.push({
+        type: "box", 
+        target: { table, row: "all", col }
+      })
+    )
+  })
+
 
   // lineage is [ (srcid, [(oid, iid),...]), .. ]
   // needto find for each iid in source 0, all iids in source 1 that share
@@ -179,7 +181,6 @@ export function filter(opid, lineageData, addOns) {
   let rhs = makeWstTable(lineageData.results[opid])
   let lineageObj = lineageData.row[opid]
   let info = lineageData.info[opid]
-  let colLineage = lineageData.col[opid]
   
   addOns.desc = "Filter - only keeping tuples meeting the condition: " + info.str
   addOns.opType = "filterOp"
@@ -191,15 +192,13 @@ export function filter(opid, lineageData, addOns) {
 
   // the columns to outline
   // indexes of attributes in predicate
-  if (false) {
-    let colIdxs = []
-    colIdxs.forEach((col) => 
-      boxSet.push({
-        type: "box", 
-        target: { table: "lhs", row: "all", col }
-      })
-    )
-  }
+  let colIdxs = (lineageData.exprs[opid] ?? [null,null])[1]
+  colIdxs.forEach((col) => 
+    boxSet.push({
+      type: "box", 
+      target: { table: "lhs", row: "all", col }
+    })
+  )
 
   lineageObj[0][1].forEach(([oid, iid]) => {
     let lRow = {table: "lhs", row: iid, col: "all"}

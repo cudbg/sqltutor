@@ -17,3 +17,62 @@ Run it:
 
 
 
+# Specification for lineage data 
+
+
+```
+opid: id of operator
+Pointers: Array<(outputTupleIdx, inputTupleIdx)>
+
+RowLineage: Array<(sourceTableIndex, Pointers)>
+
+// each element is the list of attribute offsets in the input table's schema
+ColIndexes: Array<inputAttrIdx>
+
+// one element for each attribute in the operator's output schema
+ColLineage: Array<ColIndexes>
+
+// list of child operator ids
+OpLineage: Array<opid>  
+
+// attributes used to filter/join
+ExprCols: Array<(sourceTableIndex, ColIndexes)>
+
+Info: {
+  str: string // string representation to be displayed
+  id: opid
+  name: string // operator name
+  schema: Array<string>  // attribute names of output schema
+}
+
+Tuple: Array<int | string>
+Results: {
+  columns: Array<string>  // attribute names
+  rows: Array<Tuple>
+}
+
+Lineage: {
+  row: {
+    opid: RowLineage
+  },
+  col: {
+    opid: ColLineage
+  },
+  op: { 
+    // "root" is a special opid that stores the root opid in a singleton list
+    opid: OpLineage  
+  },
+  exprs: {
+    opid: ExprCols
+  },
+  info: {
+    opid: Info
+  },
+  results: {
+    opid: Results
+  },
+  qstr: string  // query string
+}
+
+
+```
