@@ -24,7 +24,7 @@
   $: {
     if (clientWidth) {
       queryPlan = $lineageData.op;
-      info = $lineageData.op_info;
+      info = $lineageData.info;
       root = { id: queryPlan.root, queryPlan }
       //  assigns the data to a hierarchy using parent-child relationships
       nodes = hierarchy(root, (d) => {

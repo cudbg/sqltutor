@@ -31,7 +31,7 @@
   console.log("lineageStep setup", $lineageData)
 
   $: {
-    info = $lineageData.op_info[opid] ?? {}
+    info = $lineageData.info[opid] ?? {}
     addOns = {
       opID: opid,
       opType: null,
@@ -57,6 +57,7 @@
       errmsg = "Don't know how to render this yet :("
       return;
     }
+    errmsg = null;
     let wstStep = setupFunction(opid, $lineageData, addOns)
     let spec = { type: "sql", trace: [wstStep] }
     console.log(spec)

@@ -40,7 +40,7 @@ export function projection(opid, lineageData, addOns) {
 
   addOns.desc = "Projection - keeping the fields: " + info.str
   addOns.opType = "projectionOp"
-  addOns.tableCaptions.lhs = lineageData.op_info[lineageData.op[opid][0]].name
+  addOns.tableCaptions.lhs = lineageData.info[lineageData.op[opid][0]].name
   addOns.tableCaptions.rhs = info.name
 
   let annotations = []
@@ -89,12 +89,12 @@ export function hashjoin(opid, lineageData, addOns) {
   let rhsObj = lineageData.results[opid]
   let lineageObj = lineageData.row[opid]
   let colLineage = lineageData.col[opid]
-  let info = lineageData.op_info[opid]
+  let info = lineageData.info[opid]
 
   addOns.desc = "matches up tuples of both tables based on condition: " + info.str
   addOns.opType = "hashJoinOp"
-  addOns.tableCaptions.lhs = lineageData.op_info[lineageData.op[opid][0]].name
-  addOns.tableCaptions.lhs2 = lineageData.op_info[lineageData.op[opid][1]].name
+  addOns.tableCaptions.lhs = lineageData.info[lineageData.op[opid][0]].name
+  addOns.tableCaptions.lhs2 = lineageData.info[lineageData.op[opid][1]].name
   addOns.tableCaptions.rhs = info.name
 
   let annotations = []
@@ -146,11 +146,11 @@ export function groupby(opid, lineageData, addOns) {
   let lhs = makeWstTable(lineageData.results[lineageData.op[opid][0]])
   let rhs = makeWstTable(lineageData.results[opid])
   let lineageObj = lineageData.row[opid]
-  let info = lineageData.op_info[opid]
+  let info = lineageData.info[opid]
 
   addOns.desc = "Groups rows and merges their data: " + info.str
   addOns.opType = "hashGroupOp"
-  addOns.tableCaptions.lhs = lineageData.op_info[lineageData.op[opid][0]].name
+  addOns.tableCaptions.lhs = lineageData.info[lineageData.op[opid][0]].name
   addOns.tableCaptions.rhs = info.name
 
   let annotations = []
@@ -178,12 +178,12 @@ export function filter(opid, lineageData, addOns) {
   let lhs = makeWstTable(lineageData.results[lineageData.op[opid][0]])
   let rhs = makeWstTable(lineageData.results[opid])
   let lineageObj = lineageData.row[opid]
-  let info = lineageData.op_info[opid]
+  let info = lineageData.info[opid]
   let colLineage = lineageData.col[opid]
   
   addOns.desc = "Filter - only keeping tuples meeting the condition: " + info.str
   addOns.opType = "filterOp"
-  addOns.tableCaptions.lhs = lineageData.op_info[lineageData.op[opid][0]].name
+  addOns.tableCaptions.lhs = lineageData.info[lineageData.op[opid][0]].name
   addOns.tableCaptions.rhs = info.name
 
   let annotations = []
@@ -225,7 +225,7 @@ export function filter(opid, lineageData, addOns) {
 export function scan(opid, lineageData, addOns) {
   let lhs = makeWstTable(lineageData.results[opid])
   let rhs = lhs;
-  let info = lineageData.op_info[opid]
+  let info = lineageData.info[opid]
   let lineageObj = lineageData.row[opid]
   addOns.desc = "Scans all the tuples of the input table " + info.str
   addOns.opType = "scanOp"
@@ -247,7 +247,7 @@ export function scan(opid, lineageData, addOns) {
 export function query(opid, lineageData, addOns) {
   let lhs = makeWstTable(lineageData.results[opid])
   let rhs = lhs;
-  let info = lineageData.op_info[opid]
+  let info = lineageData.info[opid]
   addOns.opType = "queryOp"
   addOns.tableCaptions.lhs = info.name
   return opStepVis(info.name, lhs, null, null, [])
