@@ -153,6 +153,12 @@
   svg circle.hover {
     fill: gray;
   }
+  .prequery {
+    padding: 1em;
+  }
+  .queryText {
+    white-space: pre-wrap;
+  }
 
 </style>
 
@@ -160,13 +166,14 @@
 
 
 <div bind:clientWidth={clientWidth}>
-<h2>Query Plan</h2>
-<pre><code class="queryText">{$lineageData.qstr}</code></pre>
+  <h2>
+    Query Plan
+    <button class="btn btn-sm btn-outline-primary" on:click={() => step(-1)}>prev (&leftarrow;)</button>
+    <button class="btn btn-sm btn-outline-primary" on:click={() => step(1)}>next (&rightarrow;)</button>
+
+  </h2>
 <!--<button id="visualizeButton" type="button" on:click={onClick}>Visualize Entire Query Plan</button>-->
-<div> 
-  <button on:click={() => step(-1)}>prev (or &leftarrow;)</button>
-  <button on:click={() => step(1)}>next (or &rightarrow;)</button>
-</div>
+<pre class="prequery"><code class="queryText">{$lineageData.qstr}</code></pre>
 <svg id="qPlanTreeSVG"  bind:this={svgEl}>
   <g 
      id="qPlanTree" 

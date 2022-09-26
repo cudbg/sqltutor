@@ -17,9 +17,9 @@
   let csvEl;
   let permalink = "";
   let q = queryParams.get("q") ?? `SELECT a, sum(b+2) * 2 as c 
-  FROM data, (SELECT 1 as x FROM data) AS d2 
-  WHERE data.a = d2.x
-  GROUP BY a`;
+FROM data, (SELECT 1 as x FROM data) AS d2 
+WHERE data.a = d2.x
+GROUP BY a`;
   let csv = queryParams.get("csv") ?? `a,b,c,d,e,f,g
 0,0,0,0,a,2,c
 1,1,1,0,b,4,d
@@ -99,6 +99,9 @@ db.register_dataframe("data", data)
     min-height: 20em;
     border: 1px solid black;
   }
+  textarea {
+    font-family: monospace;
+  }
   .loading {
     text-align: center;
     padding: 10em;
@@ -117,6 +120,9 @@ db.register_dataframe("data", data)
   }
   .alert {
     white-space: pre;
+  }
+  a:hover {
+    background: var(--bs-highlight-bg);
   }
 </style>
 
@@ -140,7 +146,9 @@ db.register_dataframe("data", data)
       </p>
 
       <p>
-      Queries should be over the <mark>data</mark> table.  Its contents are loaded from the <mark>CSV</mark> textarea.  The CSV should include a header row.
+      We can only visualize simple queries over the <mark>data</mark> table.  
+      The <mark>data</mark> table is loaded from the <mark>CSV</mark> textarea.  
+      The CSV should include a header row.
       </p>
 
       <p> Use <mark>&leftarrow;</mark> and <mark>&rightarrow;</mark> to visualize the prev/next operator.  </p>
@@ -150,7 +158,10 @@ db.register_dataframe("data", data)
         <a href="https://github.com/w6113/databass-public">Databass query compilation engine</a>
         developed for <a href="https://w6113.github.io">Columbia's COMS6113 Topics in Database Research</a>.  Table visualizer borrowed from <a href="https://pandastutor.com/">pandastutor</a>
       </p>
-      <a href="#" class="link" on:click={reportBug}>report bug</a>
+      <p style="font-size: smaller;">
+        If the query should visualize but doesn't, or if there is an unexpected error, submit a
+        <a target="_blank" href={`https://docs.google.com/forms/d/e/1FAIpQLSepFF-egKhLFAuKUE5iayNWiF_sKoWunO4GdhEPsvlAnKfUkg/viewform?usp=pp_url&entry.1576731113=${encodeURI(q)}&entry.1433929607=${encodeURI(csv)}&entry.671467066=${encodeURI(errmsg)}`} class="link">report bug</a>
+      </p>
     </div>
 
     {#await pyodide.init(msgEl)}
@@ -170,7 +181,7 @@ db.register_dataframe("data", data)
       <button class="btn btn-primary" on:click={onSQLSubmit} style="width:100%;">Visualize Query</button>
     </div>
     <div class="col-md-4">
-      <h3>CSV<small class="text-muted">stored in <b>data</b> table.  header in first row</small> </h3>
+      <h3>CSV</h3>
       <textarea class="editor" id="csv" bind:this={csvEl} bind:value={csv} />
     </div>
     {/await}
@@ -193,7 +204,9 @@ db.register_dataframe("data", data)
     <div class="row errcontainer">
       <div class="col-md-12">
         <div class="alert alert-danger" role="alert">
-          <h3>Could Not Parse Query</h3>
+          <h3>
+            Could Not Parse Query <small><a target="_blank" href={`https://docs.google.com/forms/d/e/1FAIpQLSepFF-egKhLFAuKUE5iayNWiF_sKoWunO4GdhEPsvlAnKfUkg/viewform?usp=pp_url&entry.1576731113=${encodeURI(q)}&entry.1433929607=${encodeURI(csv)}&entry.671467066=${encodeURI(errmsg)}`} class="link">report bug</a></small>
+          </h3>
           {errmsg}
         </div>
       </div>
