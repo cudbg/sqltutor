@@ -160,7 +160,7 @@ db.register_dataframe("data", data)
       </p>
       <p style="font-size: smaller;">
         If the query should visualize but doesn't, or if there is an unexpected error, submit a
-        <a target="_blank" href={`https://docs.google.com/forms/d/e/1FAIpQLSepFF-egKhLFAuKUE5iayNWiF_sKoWunO4GdhEPsvlAnKfUkg/viewform?usp=pp_url&entry.1576731113=${encodeURI(q)}&entry.1433929607=${encodeURI(csv)}&entry.671467066=${encodeURI(errmsg)}`} class="link">report bug</a>
+        <a target="_blank" href={`https://docs.google.com/forms/d/e/1FAIpQLSeqdk3ZqQms92iaGq5rKV6yUdnhLcRllc8igQPl1KGUwfCEUw/viewform?usp=pp_url&entry.351077705=${encodeURI(q)}&entry.1154671727=${encodeURI(csv)}&entry.1900716371=${encodeURI(errmsg)}`} class="link">report bug</a>
       </p>
     </div>
 
@@ -205,7 +205,7 @@ db.register_dataframe("data", data)
       <div class="col-md-12">
         <div class="alert alert-danger" role="alert">
           <h3>
-            Could Not Parse Query <small><a target="_blank" href={`https://docs.google.com/forms/d/e/1FAIpQLSepFF-egKhLFAuKUE5iayNWiF_sKoWunO4GdhEPsvlAnKfUkg/viewform?usp=pp_url&entry.1576731113=${encodeURI(q)}&entry.1433929607=${encodeURI(csv)}&entry.671467066=${encodeURI(errmsg)}`} class="link">report bug</a></small>
+            Could Not Parse Query <small><a target="_blank" href={`https://docs.google.com/forms/d/e/1FAIpQLSeqdk3ZqQms92iaGq5rKV6yUdnhLcRllc8igQPl1KGUwfCEUw/viewform?usp=pp_url&entry.351077705=${encodeURI(q)}&entry.1154671727=${encodeURI(csv)}&entry.1900716371=${encodeURI(errmsg)}`} class="link">report bug</a></small>
           </h3>
           {errmsg}
         </div>
