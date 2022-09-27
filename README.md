@@ -1,5 +1,7 @@
 # SQLTutor
 
+<img src="https://github.com/cudbg/sqltutor/raw/main/screenshot.png" width=400></img>
+
 
 [Svelte-based SQL visualizer](https://cudbg.github.io/sqltutor).  
 
