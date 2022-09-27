@@ -35,7 +35,6 @@
 
       if (mounted) {
         render();
-        step(0)
       }
     }
   }

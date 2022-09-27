@@ -82,6 +82,20 @@ export function projection(opid, lineageData, addOns) {
   return opStepVis(info.name, makeWstTable(lhsObj), null, makeWstTable(rhsObj), annotations )
 }
 
+function addExprAnnotations(opid, lineageData, annotations) {
+  // the columns to outline
+  // indexes of attributes in predicate
+  lineageData.exprs[opid]?.forEach(([srcIdx, colIdxs]) => {
+    let table = (srcIdx == 0)? "lhs" : "lhs2";
+    colIdxs.forEach((col) => 
+      annotations.push({
+        type: "box", 
+        target: { table, row: "all", col }
+      })
+    )
+  })
+}
+
 
 export function hashjoin(opid, lineageData, addOns) {
   let lhsObj = lineageData.results[lineageData.op[opid][0]]
@@ -100,18 +114,7 @@ export function hashjoin(opid, lineageData, addOns) {
   let annotations = []
 
   // need to know attributes in join condition
-
-  // the columns to outline
-  // indexes of attributes in predicate
-  lineageData.exprs[opid]?.forEach(([srcIdx, colIdxs]) => {
-    let table = (srcIdx == 0)? "lhs" : "lhs2";
-    colIdxs.forEach((col) => 
-      annotations.push({
-        type: "box", 
-        target: { table, row: "all", col }
-      })
-    )
-  })
+  addExprAnnotations(opid, lineageData, annotations)
 
 
   // lineage is [ (srcid, [(oid, iid),...]), .. ]
@@ -192,13 +195,7 @@ export function filter(opid, lineageData, addOns) {
 
   // the columns to outline
   // indexes of attributes in predicate
-  let colIdxs = (lineageData.exprs[opid] ?? [null,null])[1]
-  colIdxs.forEach((col) => 
-    boxSet.push({
-      type: "box", 
-      target: { table: "lhs", row: "all", col }
-    })
-  )
+  addExprAnnotations(opid, lineageData, annotations)
 
   lineageObj[0][1].forEach(([oid, iid]) => {
     let lRow = {table: "lhs", row: iid, col: "all"}

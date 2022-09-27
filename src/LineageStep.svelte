@@ -44,6 +44,7 @@
       }
     }
    setupFunction = functions[info.name] 
+   //render()
   }
 
   let wstVis = null;
@@ -96,8 +97,10 @@
 
   onMount(() => {
   })
-  afterUpdate(() => {
+  afterUpdate(async () => {
     console.log("afterupdate")
+    render()
+    await tick()
     render()
   })
   onDestroy(() => {
@@ -120,7 +123,7 @@
 </style>
 
 <div class="step">
-  <h3 class="stepHeader">{opid} {info.name}</h3>
+  <h3 class="stepHeader">{info.name} <small class="text-muted">id: {info.id}</h3>
   <p class="stepDesc">{info.str}</p>
   <div id={`vis-${opid}`} bind:this={visEl}/>
   {#if errmsg}

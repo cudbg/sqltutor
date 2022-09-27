@@ -59,31 +59,14 @@ GROUP BY a`;
     }
   }
 
-
   function onSQLSubmit(){
-    pyodide.pyodide.runPython(`
-csv = """${csv}"""
-data = pd.read_csv(io.StringIO(csv))
-db.register_dataframe("data", data)
-    `)
+    pyodide.registerCSV("data", csv)
     $: {
       $lineageData = getQueryLineage(q)
     }
   }
 
   onMount(() => {
-//    let opts = {
-//        theme:"ace/theme/sqlserver",
-//        readOnly: true,
-//        minLines: 25 ,
-//        showPrintMargin: false
-//    }
-//    sqlEditor = ace.edit(editorEl, opts)
-//    sqlEditor.session.setMode("ace/mode/sql")
-//    sqlEditor.resize();
-//    csvEditor = ace.edit(csvEl, opts)
-//    csvEditor.session.setMode("ace/mode/text")
-//    csvEditor.resize()
   })
 
   function reportBug() {

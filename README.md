@@ -17,7 +17,14 @@ Run it:
     npm run dev
 
 
+# Future Features
 
+* [ ] support for subqueries
+* [ ] support for `count(*)`
+* [ ] show schemas in interface
+* [ ] example list of prewritten queries
+* [ ] track usage statistics
+* [ ] add new tables
 
 # Specification for lineage data 
 
