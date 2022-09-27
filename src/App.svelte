@@ -17,8 +17,8 @@
   let csvEl;
   let permalink = "";
   let q = queryParams.get("q") ?? `SELECT a, sum(b+2) * 2 as c 
-FROM data, (SELECT a*b as x FROM data) AS d2 
-WHERE data.a = d2.x
+FROM data, (SELECT a*b as x, c, d  FROM data) AS d2 
+WHERE data.b = d2.x
 GROUP BY a`;
   let csv = queryParams.get("csv") ?? `a,b,c,d,e,f,g
 0,0,0,0,a,2,c
@@ -141,21 +141,18 @@ db.register_dataframe("data", data)
 
 
 
-<main class="container">
+<main class="container-xl">
   <h1>
-    SQL Execution Visualizer 
-    <small class="text-muted">
-      permalink
-      <input type="text" bind:value={permalink} style="width:20em;"/>
-    </small>
+    SQLTutor Visualizes Query Execution
   </h1>
   <div class="row">
     <div class="col-md-4">
       <h3>About</h3>
       <p>
-      Visualizes each operator in the SQL query plan.  
+      <strong>SQLTutor</strong> visualizes each operator in the SQL query plan.  
       Click on an operator to visualize its input and output tables, along with their row/column dependencies (called <a href="https://arxiv.org/abs/1801.07237">data provenance</a>) .  
-      </p>
+      Use <mark>&leftarrow;</mark> and <mark>&rightarrow;</mark> to visualize the prev/next operator.  </p>
+
 
       <p>
       We can only visualize simple queries over the <mark>data</mark> table.  
@@ -163,7 +160,6 @@ db.register_dataframe("data", data)
       The CSV should include a header row.
       </p>
 
-      <p> Use <mark>&leftarrow;</mark> and <mark>&rightarrow;</mark> to visualize the prev/next operator.  </p>
 
       <p style="font-size:smaller;">
       See <a href="https://github.com/cudbg/sqltutor">github repo</a> for code.   
@@ -174,8 +170,11 @@ db.register_dataframe("data", data)
         and table visualizer from <a href="https://pandastutor.com/">pandastutor</a>.
       </p>
       <p style="font-size: smaller;">
-        If the query should visualize but doesn't, or if there is an unexpected error, submit a
-        <a target="_blank" href={`https://docs.google.com/forms/d/e/1FAIpQLSeqdk3ZqQms92iaGq5rKV6yUdnhLcRllc8igQPl1KGUwfCEUw/viewform?usp=pp_url&entry.351077705=${encodeURI(q)}&entry.1154671727=${encodeURI(csv)}&entry.1900716371=${encodeURI(errmsg)}`} class="link">report bug</a>
+        <a target="_blank" href={`https://docs.google.com/forms/d/e/1FAIpQLSeqdk3ZqQms92iaGq5rKV6yUdnhLcRllc8igQPl1KGUwfCEUw/viewform?usp=pp_url&entry.351077705=${encodeURI(q)}&entry.1154671727=${encodeURI(csv)}&entry.1900716371=${encodeURI(errmsg)}`} class="link">Report a bug</a>
+      </p>
+      <p class="text-muted" style="font-size: smaller">
+        permalink
+        <input type="text" bind:value={permalink} style="width:20em;"/>
       </p>
     </div>
 
@@ -227,6 +226,15 @@ db.register_dataframe("data", data)
       </div>
     </div>
     {/if}
+
+
+  <div class="row footer" style="margin-top: 3em;">
+    <div class="col-md-6 offset-md-3 text-center" style="border-top: 1px solid grey;">
+      <span class="text-muted">SQLTutor created by <a href="https://eugenewu.net">Eugene Wu</a> and Robert Ward</span>
+    </div>
+  </div>
+
+
 
 
 </main>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, afterUpdate } from "svelte"
+  import { tick, onMount, afterUpdate } from "svelte"
   import { tree, hierarchy } from "d3-hierarchy"
   import { select, selectAll } from "d3-selection"
   import { selectedOpids, lineageData } from "./stores.ts"
@@ -84,10 +84,11 @@
     mounted = true;
   })
 
-  function render() {
+  async function render() {
     var svg = select(svgEl)
     var g = select(gEl)
     g.selectAll("*").remove()
+    await tick()
 
     console.log(svgEl.parentNode)
     console.log(clientWidth)
@@ -128,10 +129,10 @@
         .attr("role", "button")
         .on("click", async function() {
           let opid = [this.__data__.data.id].flat()[0]
+          $selectedOpids = []
+          await tick()
           $selectedOpids = [opid]
-          let idx = R.indexOf(opid, opidOrder)
-          stepIdx = idx
-          console.log("index", idx, opid, opidOrder)
+          stepIdx = R.indexOf(opid, opidOrder)
         })
 
     opid2circles = {}
@@ -139,6 +140,9 @@
       opid2circles[this.__data__.data.id] = this; 
     })
 
+    stepIdx = 0;
+    step(0)
+    await tick()
   }
 
   async function onCircleClick() {
