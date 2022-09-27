@@ -20,7 +20,7 @@ Run it:
 # Specification for lineage data 
 
 
-```
+```ts
 opid: id of operator
 Pointers: Array<(outputTupleIdx, inputTupleIdx)>
 
