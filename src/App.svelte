@@ -118,12 +118,24 @@ db.register_dataframe("data", data)
     margin-left: .5em;
     color: grey;
   }
-  .alert {
-    white-space: pre;
-  }
   a:hover {
     background: var(--bs-highlight-bg);
   }
+
+
+  .bd-callout {
+    padding: 1.25rem;
+    margin-top: 1.25rem;
+    margin-bottom: 1.25rem;
+    background-color: var(--bd-callout-bg, var(--bs-gray-100));
+    border-left: 0.25rem solid var(--bd-callout-border, var(--bs-gray-300));
+  }
+
+  .bd-callout-danger {
+    --bd-callout-bg: rgba(var(--bs-danger-rgb), .075);
+    --bd-callout-border: rgba(var(--bs-danger-rgb), .5);
+  }
+
 </style>
 
 
@@ -206,11 +218,11 @@ db.register_dataframe("data", data)
     {#if errmsg}
     <div class="row errcontainer">
       <div class="col-md-12">
-        <div class="alert alert-danger" role="alert">
+        <div class="bd-callout bd-callout-danger" role="alert">
           <h3>
             Could Not Parse Query <small><a target="_blank" href={`https://docs.google.com/forms/d/e/1FAIpQLSeqdk3ZqQms92iaGq5rKV6yUdnhLcRllc8igQPl1KGUwfCEUw/viewform?usp=pp_url&entry.351077705=${encodeURI(q)}&entry.1154671727=${encodeURI(csv)}&entry.1900716371=${encodeURI(errmsg)}`} class="link">report bug</a></small>
           </h3>
-          {errmsg}
+          <pre>{errmsg}</pre>
         </div>
       </div>
     </div>

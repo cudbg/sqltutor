@@ -108,14 +108,29 @@
 
 </script>
 
+<style>
+  .bd-callout {
+    padding: 1.25rem;
+    margin-top: 1.25rem;
+    margin-bottom: 1.25rem;
+    background-color: var(--bd-callout-bg, var(--bs-gray-100));
+    border-left: 0.25rem solid var(--bd-callout-border, var(--bs-gray-300));
+  }
+
+</style>
 
 <div class="step">
   <h3 class="stepHeader">{opid} {info.name}</h3>
   <p class="stepDesc">{info.str}</p>
   <div id={`vis-${opid}`} bind:this={visEl}/>
   {#if errmsg}
-  <div class="alert alert-warn">
+  <div class="bd-callout">
+    <p>
     {errmsg}
+    </p>
+    <p>
+    Help us <a href="https://github.com/cudbg/sqltutor">add it to the codebase</a>!
+    </p>
   </div>
   {/if}
 </div>
