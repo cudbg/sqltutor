@@ -30,14 +30,43 @@ const datasets = [
 1,103,12
 2,102,13
 2,103,14`
+  },
+  {
+    name: "data",
+    csv: `a,b,c,d,e,f,g
+0,0,0,0,a,2,c
+1,1,1,0,b,4,d
+2,2,0,0,c,6,e
+3,3,1,0,d,8,cde
+4,4,0,0,abc,10,a
+5,0,1,0,cde,12,b
+6,1,0,0,a,14,c
+7,2,1,0,b,16,abc
+8,3,0,0,c,18,c
+9,4,1,0,d,20,d
+10,0,0,0,abc,22,e
+11,1,1,0,cde,24,cde
+12,2,0,0,a,26,a
+13,3,1,0,b,28,b
+14,4,0,0,c,30,c
+15,0,1,0,d,32,abc
+16,1,0,0,abc,34,c
+17,2,1,0,cde,36,d
+18,3,0,0,a,38,e
+19,4,1,0,b,40,cde`
   }
 ]
 
 class Pyodide {
   pyodide;
   state;
+  cbs = []
   constructor() {
     this.state = State.nothing;
+  }
+
+  onLoaded(cb) {
+    this.cbs.push(cb)
   }
 
   async init(msgEl) {
@@ -81,6 +110,7 @@ db = Database.db()
     msgEl.innerHTML = "(100%) Ready!"
     this.state = State.loaded;
     this.loadDatasets()
+    this.cbs.forEach((cb) => cb(this))
     return this.pyodide
 
   }
@@ -89,6 +119,19 @@ db = Database.db()
     datasets.forEach(({name,csv}) => {
       this.registerCSV(name,csv)
     })
+  }
+  
+  schemas() {
+    let schemas = this.pyodide.runPython(`
+db = Database.db()
+schemas = []
+for name in db.tablenames:
+  schema = [f"{a.aname} {a.typ}" for a in db.schema(name)]
+  schemas.append([name, ", ".join(schema)])
+json.dumps(schemas)
+`)
+    console.log("schemas", schemas)
+    return JSON.parse(schemas)
   }
 
   registerCSV(name, csvstring) {

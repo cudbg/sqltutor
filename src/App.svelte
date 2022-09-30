@@ -3,9 +3,20 @@
   import { tick, onMount } from "svelte"
   import QueryPlan from "./QueryPlan.svelte"
   import LineageDiagram from "./LineageDiagram.svelte"
+  import Bug from "./Bug.svelte"
   import * as foo from "./assets/lineage.json"
   import { lineageData, selectedOpids } from "./stores.ts"
   import { pyodide } from "./pyodide"
+  import {generateUUID} from "./guid"
+  import { ConvexHttpClient } from "convex/browser";
+  import clientConfig from "../convex/_generated/clientConfig";
+
+  const convex = new ConvexHttpClient(clientConfig)
+  window.convex = convex;
+  const sessionID = generateUUID()
+  const addStat = convex.mutation("addStat")
+
+
 
   let msgEl = document.getElementById("msg");
   let queryParams = new URLSearchParams(window.location.search)
@@ -16,6 +27,8 @@
   let editorEl;
   let csvEl;
   let permalink = "";
+  let newTableName;
+  let schemas = [];
   let q = queryParams.get("q") ?? `SELECT a, sum(b+2) * 2 as c 
 FROM data, (SELECT a*b as x, c, d  FROM data) AS d2 
 WHERE data.b = d2.x
@@ -59,20 +72,38 @@ GROUP BY a`;
     }
   }
 
-  function onSQLSubmit(){
-    pyodide.registerCSV("data", csv)
-    $: {
-      $lineageData = getQueryLineage(q)
+  async function addTable() {
+    if (newTableName) {
+      try {
+        pyodide.registerCSV(newTableName, csv)
+      } catch(e) {
+        $: errmsg = e;
+      }
+      newTableName = null;
+      $: schemas = pyodide.schemas()
+    } else {
+      alert("New table needs a name!")
     }
   }
+
+  function onSQLSubmit(){
+    addStat(sessionID, q, csv, errmsg, false, null, null)
+    $: {
+      $lineageData = getQueryLineage(q)
+
+    }
+  }
+
+  pyodide.onLoaded(() => {
+  $: schemas = pyodide.schemas()
+  })
 
   onMount(() => {
   })
 
-  function reportBug() {
-    
+  function reportBug(comment, email) {
+    addStat(sessionID, q, csv, errmsg, true, comment, email)
   }
-
 
 </script>
 
@@ -96,13 +127,20 @@ GROUP BY a`;
   small {
     font-size: 0.5em;
   }
-  small input {
+  small .permalink {
     font-size: 0.9em;
     margin-left: .5em;
     color: grey;
   }
   a:hover {
     background: var(--bs-highlight-bg);
+  }
+  .schema {
+    padding-left: 0px;
+    list-style: none;
+  }
+  .schema li {
+    margin-bottom: .5em;
   }
 
 
@@ -121,7 +159,7 @@ GROUP BY a`;
 
 </style>
 
-
+<Bug id="modalBug" reportBug={reportBug} />
 
 
 <main class="container-xl">
@@ -129,7 +167,7 @@ GROUP BY a`;
     SQLTutor Visualizes Query Execution
   </h1>
   <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-3">
       <h3>About</h3>
       <p>
       <strong>SQLTutor</strong> visualizes each operator in the SQL query plan.  
@@ -138,49 +176,56 @@ GROUP BY a`;
 
 
       <p>
-      We can only visualize simple queries over the <mark>data</mark> table.  
-      The <mark>data</mark> table is loaded from the <mark>CSV</mark> textarea.  
-      The CSV should include a header row.
+      We can only visualize simple queries. 
+      You can add new tables using the <mark>CSV</mark> textarea.  The CSV should include a header row.
       </p>
 
 
-      <p style="font-size:smaller;">
-      See <a href="https://github.com/cudbg/sqltutor">github repo</a> for code.   
-      Implemented using the instructional 
-        <a href="https://github.com/w6113/databass-public">Databass query compilation engine</a>
-        developed for <a href="https://w6113.github.io">Columbia's COMS6113</a>,
-        <a href="https://pyodide.org/">pyodide</a>,
-        and table visualizer from <a href="https://pandastutor.com/">pandastutor</a>.
-      </p>
       <p style="font-size: smaller;">
-      <a target="_blank" href={`https://docs.google.com/forms/d/e/1FAIpQLSeqdk3ZqQms92iaGq5rKV6yUdnhLcRllc8igQPl1KGUwfCEUw/viewform?usp=pp_url&entry.351077705=${encodeURI(q)}&entry.1154671727=${encodeURI(csv)}&entry.1900716371=${encodeURI(errmsg)}`} class="link">Report a bug</a>. 
-      Want to improve this? Contact us!
+      <!--<a target="_blank" href={`https://docs.google.com/forms/d/e/1FAIpQLSeqdk3ZqQms92iaGq5rKV6yUdnhLcRllc8igQPl1KGUwfCEUw/viewform?usp=pp_url&entry.351077705=${encodeURI(q)}&entry.1154671727=${encodeURI(csv)}&entry.1900716371=${encodeURI(errmsg)}`} class="link">Report a bug</a>. -->
+      <a href="#" class="link" data-bs-toggle="modal" data-bs-target="#modalBug">Report a bug or feature request</a>. 
+      <!--Want to help? Contact us!-->
       </p>
       <p class="text-muted" style="font-size: smaller">
         permalink
-        <input type="text" bind:value={permalink} style="width:20em;"/>
+        <input type="text" class="permalink" bind:value={permalink} style="width:100%;"/>
       </p>
     </div>
 
     {#await pyodide.init(msgEl)}
-    <div class="col-md-4">
+    <div class="col-md-3">
       <h3>SQL</h3>
       <textarea class="editor" disabled bind:value={q} />
       <button class="btn btn-secondary" disabled style="width:100%;">Loading libraries...</button>
     </div>
-    <div class="col-md-4">
-      <h3>CSV<small class="text-muted">stored in <mark>data</mark> table.</small> </h3>
+    <div class="col-md-3">
+      <h3>CSV</h3>
       <textarea class="editor" disabled bind:value={csv} />
+      <button class="btn btn-secondary" disabled style="width:100%;">Loading libraries...</button>
+    </div>
+    <div class="col-md-3">
+      <h3>Database</h3>
+      Loading...
     </div>
     {:then}
-    <div class="col-md-4">
+    <div class="col-md-3">
       <h3>SQL</h3>
       <textarea class="editor" id="q" bind:this={editorEl} bind:value={q} />
       <button class="btn btn-primary" on:click={onSQLSubmit} style="width:100%;">Visualize Query</button>
     </div>
-    <div class="col-md-4">
-      <h3>CSV</h3>
+    <div class="col-md-3">
+      <h3>CSV 
+        <small><input bind:value={newTableName} placeholder="New Table Name"/></small> </h3>
       <textarea class="editor" id="csv" bind:this={csvEl} bind:value={csv} />
+      <button class="btn btn-primary" on:click={addTable} style="width:100%;">Add Table</button>
+    </div>
+    <div class="col-md-3">
+      <h3>Tables</h3>
+      <ul class="schema">
+        {#each schemas as [name, schema] }
+          <li><b>{name}</b>({schema})</li>
+        {/each}
+      </ul>
     </div>
     {/await}
 
@@ -203,7 +248,10 @@ GROUP BY a`;
       <div class="col-md-12">
         <div class="bd-callout bd-callout-danger" role="alert">
           <h3>
-            Could Not Parse Query <small><a target="_blank" href={`https://docs.google.com/forms/d/e/1FAIpQLSeqdk3ZqQms92iaGq5rKV6yUdnhLcRllc8igQPl1KGUwfCEUw/viewform?usp=pp_url&entry.351077705=${encodeURI(q)}&entry.1154671727=${encodeURI(csv)}&entry.1900716371=${encodeURI(errmsg)}`} class="link">report bug</a></small>
+            Could Not Parse Query <small>
+              <!--<a target="_blank" href={`https://docs.google.com/forms/d/e/1FAIpQLSeqdk3ZqQms92iaGq5rKV6yUdnhLcRllc8igQPl1KGUwfCEUw/viewform?usp=pp_url&entry.351077705=${encodeURI(q)}&entry.1154671727=${encodeURI(csv)}&entry.1900716371=${encodeURI(errmsg)}`} class="link">report bug</a>-->
+              <a href="#" data-bs-toggle="modal" data-bs-target="#modalBug">report bug</a>
+            </small>
           </h3>
           <pre>{errmsg}</pre>
         </div>
@@ -214,7 +262,20 @@ GROUP BY a`;
 
   <div class="row footer" style="margin-top: 3em;">
     <div class="col-md-6 offset-md-3 text-center" style="border-top: 1px solid grey;">
+      <p>
       <span class="text-muted">SQLTutor created by <a href="https://eugenewu.net">Eugene Wu</a> and Robert Ward</span>
+      </p>
+
+      <p style="font-size:smaller;">
+      See <a href="https://github.com/cudbg/sqltutor">github repo</a> for code.   
+      Implemented using the instructional 
+        <a href="https://github.com/w6113/databass-public">Databass DBMS</a>
+        developed for Columbia's <a href="https://w6113.github.io">COMS6113</a>,
+        <a href="https://pyodide.org/">pyodide</a>,
+        <a href="https://convex.dev/">convex</a>,
+        and table vis from <a href="https://pandastutor.com/">pandastutor</a>.
+      </p>
+
     </div>
   </div>
 

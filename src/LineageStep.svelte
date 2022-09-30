@@ -9,7 +9,7 @@
     query
   } from "./util"
   import { select } from "d3-selection"
-  import { afterUpdate, onMount, onDestroy } from "svelte"
+  import { tick, afterUpdate, onMount, onDestroy } from "svelte"
   import { selectedOpids, lineageData } from "./stores.ts"
 
   const functions = {
