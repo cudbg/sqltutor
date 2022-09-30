@@ -168,7 +168,7 @@ GROUP BY a`;
 
 <main class="container-xl">
   <h1>
-    SQLTutor Visualizes Query Execution
+    SQLTutor Visualizes Query Execution <small><a href="https://github.com/cudbg/sqltutor">github</a></small>
   </h1>
   <div class="row">
     <div class="col-md-3">
