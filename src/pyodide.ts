@@ -100,7 +100,7 @@ await micropip.install("./parsimonious-0.9.0-py3-none-any.whl")
    `)
     await tick()
 
-    msgEl.innerHTML = "( 80%) Loading sql2pandas wheel.."
+    msgEl.innerHTML = "( 80%) Loading databass wheel.."
    await this.pyodide.runPythonAsync(`
 await micropip.install('./databass-0.0.1-py3-none-any.whl')
 import databass 

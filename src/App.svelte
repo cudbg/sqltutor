@@ -29,11 +29,12 @@
   let permalink = "";
   let newTableName;
   let schemas = [];
+  let addedCSVs = [];
   let q = queryParams.get("q") ?? `SELECT a, sum(b+2) * 2 as c 
 FROM data, (SELECT a*b as x, c, d  FROM data) AS d2 
 WHERE data.b = d2.x
 GROUP BY a`;
-  let csv = queryParams.get("csv") ?? `a,b,c,d,e,f,g
+  let csv = `a,b,c,d,e,f,g
 0,0,0,0,a,2,c
 1,1,1,0,b,4,d
 2,2,0,0,c,6,e
@@ -43,20 +44,10 @@ GROUP BY a`;
 6,1,0,0,a,14,c
 7,2,1,0,b,16,abc
 8,3,0,0,c,18,c
-9,4,1,0,d,20,d
-10,0,0,0,abc,22,e
-11,1,1,0,cde,24,cde
-12,2,0,0,a,26,a
-13,3,1,0,b,28,b
-14,4,0,0,c,30,c
-15,0,1,0,d,32,abc
-16,1,0,0,abc,34,c
-17,2,1,0,cde,36,d
-18,3,0,0,a,38,e
-19,4,1,0,b,40,cde`;
+9,4,1,0,d,20,d`;
 
   $: {
-    permalink = `https://cudbg.github.io/sqltutor/?q=${encodeURI(q)}&csv=${encodeURI(csv)}`;
+    permalink = `https://cudbg.github.io/sqltutor/?q=${encodeURI(q)}&csvs=${encodeURI(JSON.stringify(addedCSVs))}`;
   }
 
   function getQueryLineage(q) {
@@ -76,11 +67,16 @@ GROUP BY a`;
     if (newTableName) {
       try {
         pyodide.registerCSV(newTableName, csv)
+        addedCSVs.push({
+          name: newTableName,
+          csv
+        })
       } catch(e) {
         $: errmsg = e;
       }
       newTableName = null;
       $: schemas = pyodide.schemas()
+      $: addedCSVs = addedCSVs
     } else {
       alert("New table needs a name!")
     }
@@ -95,14 +91,22 @@ GROUP BY a`;
   }
 
   pyodide.onLoaded(() => {
-  $: schemas = pyodide.schemas()
+    let csvs = queryParams.get("csvs")
+    console.log("loaded csvs from url", csvs)
+    if (csvs) {
+      $: addedCSVs = JSON.parse(csvs)
+      addedCSVs.forEach(({name, csv}) =>
+        pyodide.registerCSV(name, csv)
+      )
+    }
+    $: schemas = pyodide.schemas()
   })
 
   onMount(() => {
   })
 
   function reportBug(comment, email) {
-    addStat(sessionID, q, csv, errmsg, true, comment, email)
+    addStat(sessionID, q, JSON.stringify(addedCSVs), errmsg, true, comment, email)
   }
 
 </script>
