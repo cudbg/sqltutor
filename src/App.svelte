@@ -192,6 +192,8 @@ GROUP BY a`;
       <p style="font-size: smaller;">
       <!--<a target="_blank" href={`https://docs.google.com/forms/d/e/1FAIpQLSeqdk3ZqQms92iaGq5rKV6yUdnhLcRllc8igQPl1KGUwfCEUw/viewform?usp=pp_url&entry.351077705=${encodeURI(q)}&entry.1154671727=${encodeURI(csv)}&entry.1900716371=${encodeURI(errmsg)}`} class="link">Report a bug</a>. -->
       <a href="#" class="link" data-bs-toggle="modal" data-bs-target="#modalBug">Report a bug or feature request</a>. 
+      <br/>
+      <a href="https://cudbg.github.io/sql2pandas/" class="link">Learning Pandas too?  Check out sql2pandas</a>
       <!--Want to help? Contact us!-->
       </p>
       <p class="text-muted" style="font-size: smaller">
