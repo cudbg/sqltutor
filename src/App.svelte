@@ -66,6 +66,10 @@ GROUP BY a`;
   async function addTable() {
     if (newTableName) {
       try {
+        if (csv.split("\n").length > 15) {
+          $: errmsg = "CSV too large for the visualizer to be useful.  Please limit table to 15 rows."
+          return
+        }
         pyodide.registerCSV(newTableName, csv)
         addedCSVs.push({
           name: newTableName,
@@ -78,7 +82,7 @@ GROUP BY a`;
       $: schemas = pyodide.schemas()
       $: addedCSVs = addedCSVs
     } else {
-      alert("New table needs a name!")
+      $: errmsg = "New table needs a name!"
     }
   }
 
@@ -176,12 +180,12 @@ GROUP BY a`;
       <p>
       <strong>SQLTutor</strong> visualizes each operator in the SQL query plan.  
       Click on an operator to visualize its input and output tables, along with their row/column dependencies (called <a href="https://arxiv.org/abs/1801.07237">data provenance</a>) .  
+      You can add new tables using the <mark>CSV</mark> textarea.  The CSV should include a header row.
       Use <mark>&leftarrow;</mark> and <mark>&rightarrow;</mark> to visualize the prev/next operator.  </p>
 
 
       <p>
-      We can only visualize simple queries. 
-      You can add new tables using the <mark>CSV</mark> textarea.  The CSV should include a header row.
+      This is an early release!  SQLTutor currently only supports very simple queries and <a href="https://github.com/w6113/databass-public/blob/master/databass/parse_sql.py">follows a simple grammar</a>.    We hope to eventually support DuckDB as the backend in a future release.
       </p>
 
 
@@ -265,7 +269,7 @@ GROUP BY a`;
 
 
   <div class="row footer" style="margin-top: 3em;">
-    <div class="col-md-6 offset-md-3 text-center" style="border-top: 1px solid grey;">
+    <div class="col-md-8 offset-md-2 text-center" style="border-top: 1px solid grey;">
       <p>
       <span class="text-muted">SQLTutor created by <a href="https://eugenewu.net">Eugene Wu</a> and Robert Ward</span>
       </p>
@@ -279,6 +283,11 @@ GROUP BY a`;
         <a href="https://convex.dev/">convex</a>,
         and table vis from <a href="https://pandastutor.com/">pandastutor</a>.
       </p>
+
+      <p style="font-size:smaller;">
+      Privacy Policy: By using SQLTutor, your queries, csvs, user interactions, and IP address are logged and may be analyzed for research purposes. Nearly all web services collect this basic information from users in their server logs. SQLTutor does not collect any personally identifiable information from its users. 
+      </p>
+
 
     </div>
   </div>
