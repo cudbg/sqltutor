@@ -3,6 +3,7 @@
   import { tick, onMount } from "svelte"
   import QueryPlan from "./QueryPlan.svelte"
   import LineageDiagram from "./LineageDiagram.svelte"
+  import QueryPicker from "./QueryPicker.svelte"
   import Bug from "./Bug.svelte"
   import * as foo from "./assets/lineage.json"
   import { lineageData, selectedOpids } from "./stores.ts"
@@ -92,6 +93,11 @@ GROUP BY a`;
       $lineageData = getQueryLineage(q)
 
     }
+  }
+
+  function onSelectQuery(query) {
+  console.log("selected dropdown", query)
+    $: q = query
   }
 
   pyodide.onLoaded(() => {
@@ -204,7 +210,9 @@ GROUP BY a`;
 
     {#await pyodide.init(msgEl)}
     <div class="col-md-3">
-      <h3>SQL</h3>
+      <h3>
+        SQL
+      </h3>
       <textarea class="editor" disabled bind:value={q} />
       <button class="btn btn-secondary" disabled style="width:100%;">Loading libraries...</button>
     </div>
@@ -219,7 +227,10 @@ GROUP BY a`;
     </div>
     {:then}
     <div class="col-md-3">
-      <h3>SQL</h3>
+      <h3>
+        SQL
+        <small><QueryPicker onSelect={onSelectQuery}/></small>
+      </h3>
       <textarea class="editor" id="q" bind:this={editorEl} bind:value={q} />
       <button class="btn btn-primary" on:click={onSQLSubmit} style="width:100%;">Visualize Query</button>
     </div>
