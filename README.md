@@ -11,10 +11,12 @@ Built on top of
 * [Databass](https://github.com/w6113/databass-public) query compilation database engine, extended with cutting-edge [provenance instrumentation techniques](https://arxiv.org/abs/1801.07237) 
 * Table visualizer from [pandastutor](https://pandastutor.com/)
 
-Run it:
+Develop and Run
 
     npm install .
+    npx convex dev
     npm run dev
+
 
 
 # Future Features
