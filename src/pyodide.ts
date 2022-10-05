@@ -10,16 +10,16 @@ const datasets = [
   {
     name: "sailors",
     csv: `sid,name,rating,age
-1,"Eugene",7,22
-2,'Luis',2,39
-3,'Ken',8,27`
+1,Eugene,7,22
+2,Luis,2,39
+3,Ken,8,27`
   },
   {
     name: "boats",
     csv: `bid,name,color
-101,'Legacy','red'
-102,'Melon','blue'
-103,'Mars','red'`
+101,Legacy,red
+102,Melon,blue
+103,Mars,red`
   },
 
   {
